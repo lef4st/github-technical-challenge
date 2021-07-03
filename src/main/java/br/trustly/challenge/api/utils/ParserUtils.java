@@ -2,6 +2,8 @@ package br.trustly.challenge.api.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 /**
  * Utility class focused on subjects involving parse
@@ -13,6 +15,25 @@ public class ParserUtils {
 	public static final String URL_RAW_PREFIX = "https://raw.githubusercontent.com";
 	
 	private ParserUtils() {}
+	
+	public static String getFinalCommitCode(BufferedReader in) throws IOException {
+		
+		String inputLine;
+		String finalCommitCode = null;
+
+		while ((inputLine = in.readLine()) != null) {
+        	if(inputLine.contains("js-permalink-shortcut")) {
+        		
+        		String auxSubString = inputLine.substring(inputLine.indexOf("href=\"") + 6);
+        		String link = auxSubString.substring(0, auxSubString.indexOf("\""));
+        		finalCommitCode = link.substring(link.lastIndexOf('/') + 1);
+        		
+        		break;
+        	}
+        }
+		
+		return finalCommitCode;
+	}
 	
 	public static void getMainItensSection(BufferedReader in) throws IOException {
 		

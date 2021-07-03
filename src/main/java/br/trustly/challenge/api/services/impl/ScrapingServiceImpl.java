@@ -7,6 +7,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import br.trustly.challenge.api.models.Extension;
@@ -20,13 +23,25 @@ import br.trustly.challenge.api.utils.ParserUtils;
 public class ScrapingServiceImpl implements ScrapingService {
 
 	@Override
-	public GitHubRepo scrapRepoByUrl(String url) {
+	@CacheEvict(value = "repositories", allEntries=true) 
+	public void emptyCache() {}
+	
+	@Override
+	@Cacheable(value="repositories", key ="#url")
+	public GitHubRepo scrapRepoByUrlCacheable(String url) {
 
+		String commitCode = null;
+		try {
+			commitCode = getFinalCommitCode(url);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		HashMap<String, Extension> extensionsMap = scrapDirectoryByUrl(url);
 
 		GitHubRepo repository = new GitHubRepo();
 		repository.setUrl(url);
-		repository.setCommit(null);
+		repository.setCommit(commitCode);
 		repository.setExtensionsMap(extensionsMap);
 		
 		return repository;
@@ -128,6 +143,25 @@ public class ScrapingServiceImpl implements ScrapingService {
 		
 		
 		return extensionsMap;
+	}
+
+	@Override
+	public String getFinalCommitCode(String url) throws IOException {
+		
+		BufferedReader in;
+		URL urlResource;
+		String finalCommitCode = null;
+		
+		urlResource = new URL(url);
+		
+		in = new BufferedReader(
+		new InputStreamReader(urlResource.openStream()));
+
+		finalCommitCode = ParserUtils.getFinalCommitCode(in);
+		
+		in.close();
+		
+		return finalCommitCode;
 	}
 
 }

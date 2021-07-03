@@ -13,9 +13,13 @@ import br.trustly.challenge.api.models.GitHubRepo;
  */
 public interface ScrapingService {
 
-	GitHubRepo scrapRepoByUrl(String url);
+	void emptyCache();
+	
+	GitHubRepo scrapRepoByUrlCacheable(String url);
 	
 	HashMap<String, Extension> scrapDirectoryByUrl(String url);
 	
 	HashMap<String, Extension> processFileListBySection(BufferedReader in) throws IOException;
+	
+	String getFinalCommitCode(String url) throws IOException;
 }

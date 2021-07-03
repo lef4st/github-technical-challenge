@@ -74,6 +74,8 @@ public void calculateFileDataWithUrl(URL url) throws IOException {
 		URLConnection conn;
 		
 		conn = this.url.openConnection();
+		conn.setDefaultUseCaches(false);
+		conn.setUseCaches(false);
 		size = conn.getContentLengthLong();
 		conn.getInputStream().close();
 		
