@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import br.trustly.challenge.api.exceptions.DirectoryNotFoundException;
 import br.trustly.challenge.api.models.Extension;
 import br.trustly.challenge.api.models.FileData;
 import br.trustly.challenge.api.models.GitHubRepo;
@@ -28,14 +29,9 @@ public class ScrapingServiceImpl implements ScrapingService {
 	
 	@Override
 	@Cacheable(value="repositories", key ="#url")
-	public GitHubRepo scrapRepoByUrlCacheable(String url) {
+	public GitHubRepo scrapRepoByUrlCacheable(String url) throws IOException {
 
-		String commitCode = null;
-		try {
-			commitCode = getFinalCommitCode(url);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		String commitCode = getFinalCommitCode(url);
 		
 		HashMap<String, Extension> extensionsMap = scrapDirectoryByUrl(url);
 
@@ -48,29 +44,29 @@ public class ScrapingServiceImpl implements ScrapingService {
 	}
 	
 	@Override
-	public HashMap<String, Extension> scrapDirectoryByUrl(String url) {
+	public HashMap<String, Extension> scrapDirectoryByUrl(String url) throws IOException {
 		
 		HashMap<String, Extension> extensionsMap = null;
 		BufferedReader in;
 		URL urlResource;
 
+		urlResource = new URL(url);
+		
+		in = new BufferedReader(
+				new InputStreamReader(urlResource.openStream()));
+		
 		try {
-			
-			urlResource = new URL(url);
-			
-			in = new BufferedReader(
-			new InputStreamReader(urlResource.openStream()));
 
 			// Get main items section
 	        ParserUtils.getMainItensSection(in);
 			
 	        // Verify files and directories
 	        extensionsMap = processFileListBySection(in);
-	        
-	        in.close();
-	        
-		} catch (IOException e) {
-			e.printStackTrace();
+
+		} finally {
+			if(in != null) {
+				in.close();
+			}
 		}
 		
 		return extensionsMap;
@@ -119,7 +115,7 @@ public class ScrapingServiceImpl implements ScrapingService {
 			try {
 				fileData.calculateFileDataWithUrl(new URL(fileRawUrl));
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new DirectoryNotFoundException("File raw directory not found: " + fileRawUrl);
 			}
 
 			Extension extensionToAdd = new  Extension();
@@ -136,7 +132,11 @@ public class ScrapingServiceImpl implements ScrapingService {
 			
 			HashMap<String, Extension> extensionsMapLoop = new HashMap<String, Extension>();
 			
-			extensionsMapLoop = scrapDirectoryByUrl(directoryUrl);
+			try {
+				extensionsMapLoop = scrapDirectoryByUrl(directoryUrl);
+			} catch (IOException e) {
+				throw new DirectoryNotFoundException("Subdirectory not found: " + directoryUrl);
+			}
 			
 			GitHubUtils.sumExtensionsMaps(extensionsMap, extensionsMapLoop);
 		});
@@ -157,9 +157,15 @@ public class ScrapingServiceImpl implements ScrapingService {
 		in = new BufferedReader(
 		new InputStreamReader(urlResource.openStream()));
 
-		finalCommitCode = ParserUtils.getFinalCommitCode(in);
+		try {
 		
-		in.close();
+			finalCommitCode = ParserUtils.getFinalCommitCode(in);
+		
+		} finally {
+			if(in != null) {
+				in.close();
+			}
+		}
 		
 		return finalCommitCode;
 	}

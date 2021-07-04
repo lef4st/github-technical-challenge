@@ -15,9 +15,9 @@ public interface ScrapingService {
 
 	void emptyCache();
 	
-	GitHubRepo scrapRepoByUrlCacheable(String url);
+	GitHubRepo scrapRepoByUrlCacheable(String url) throws IOException;
 	
-	HashMap<String, Extension> scrapDirectoryByUrl(String url);
+	HashMap<String, Extension> scrapDirectoryByUrl(String url) throws IOException;
 	
 	HashMap<String, Extension> processFileListBySection(BufferedReader in) throws IOException;
 	

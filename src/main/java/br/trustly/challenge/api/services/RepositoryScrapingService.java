@@ -1,5 +1,7 @@
 package br.trustly.challenge.api.services;
 
+import java.io.IOException;
+
 import br.trustly.challenge.api.DTO.ExtensionsResponseDTO;
 import br.trustly.challenge.api.models.GitHubRequest;
 
@@ -9,5 +11,5 @@ import br.trustly.challenge.api.models.GitHubRequest;
  */
 public interface RepositoryScrapingService {
 
-	ExtensionsResponseDTO scrapRepo(GitHubRequest request);
+	ExtensionsResponseDTO scrapRepo(GitHubRequest request) throws IOException;
 }

@@ -1,5 +1,6 @@
 package br.trustly.challenge.api.controllers;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,11 @@ public class ScrapingController {
 	 * @return A <b>ResponseEntity<List<Extension>></b> with status 200(OK) containing
 	 *  a list with file count, the total number of lines and the total number of bytes 
 	 *  grouped by file extension.
+	 * @throws IOException 
 	 */
 	@GetMapping("/scrapRepoByUrl")
 	public ResponseEntity<List<Extension>> scrapRepoByUrl(@RequestParam(value = "repoUrl", 
-			required = true) String repoUrl) {
+			required = true) String repoUrl) throws IOException {
 
 		GitHubRequest request = new GitHubRequest(repoUrl);
 		

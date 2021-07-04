@@ -18,15 +18,10 @@ public class RepositoryScrapingServiceImpl implements RepositoryScrapingService 
 	ScrapingService scrapingService;
 	
 	@Override
-	public ExtensionsResponseDTO scrapRepo(GitHubRequest request) {
-
+	public ExtensionsResponseDTO scrapRepo(GitHubRequest request) throws IOException {
+		
 		//get final commit code
-		String commitCode = null;
-		try {
-			commitCode = scrapingService.getFinalCommitCode(request.getUrl());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		String commitCode = scrapingService.getFinalCommitCode(request.getUrl());
 	
 		// if cached, get the cached response
 		// if it's not, scrap the response
