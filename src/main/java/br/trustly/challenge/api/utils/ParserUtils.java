@@ -2,8 +2,6 @@ package br.trustly.challenge.api.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 
 /**
  * Utility class focused on subjects involving parse
