@@ -32,8 +32,10 @@ public class ScrapingServiceImpl implements ScrapingService {
 	@Cacheable(value="repositories", key ="#url")
 	public GitHubRepo scrapRepoByUrlCacheable(String url) throws IOException {
 
+		// get the updated number of the last commit
 		String commitCode = getFinalCommitCode(url);
 		
+		// starts the recursive scrap call on the repository
 		HashMap<String, Extension> extensionsMap = scrapDirectoryByUrl(url);
 
 		GitHubRepo repository = new GitHubRepo();
@@ -54,6 +56,7 @@ public class ScrapingServiceImpl implements ScrapingService {
 
 		urlResource = new URL(url);
 		
+		// buffers the html page
 		in = new BufferedReader(
 				new InputStreamReader(urlResource.openStream()));
 		
@@ -83,10 +86,13 @@ public class ScrapingServiceImpl implements ScrapingService {
 		ArrayList<FileSystemNode> fileSystemNodes = new ArrayList<FileSystemNode>();
 		boolean insideDirectoryOrFileSection = true;
 	
+		// process the files and directories section
 		while(insideDirectoryOrFileSection) {
 		
+			// checks if the next item is a directory or a file
 			String DirectoryOrFile = ParserUtils.verifyNextItemIsDirectoryOrFile(in);
 			
+			// if null, it means that the file and directory section is finished.
 			if(DirectoryOrFile == null) {
 				insideDirectoryOrFileSection = false;
 				break;
@@ -96,12 +102,14 @@ public class ScrapingServiceImpl implements ScrapingService {
 			
 				case "Directory":
 					
+					// if directory, perform the proper processing to retrieve its url
 					String directoryUrl = ParserUtils.getDirectoryUrl(in);
 					fileSystemNodes.add(new FileSystemNode(FileSystem.DIRECTORY, directoryUrl));
 					break;
 					
 				case "File":
 
+					// if file, perform the proper processing to retrieve its url
 					String fileRawUrl = ParserUtils.getFileRawUrl(in);
 					fileSystemNodes.add(new FileSystemNode(FileSystem.FILE, fileRawUrl));
 					break;
@@ -119,6 +127,7 @@ public class ScrapingServiceImpl implements ScrapingService {
 		
 		HashMap<String, Extension> extensionsMap = new HashMap<>();
 		
+		// uses Java's parallelStream feature to process the filesystem list
 		fileSystemNodes.parallelStream().forEach(fileSystemNode -> {
 			
 			HashMap<String, Extension> extensionsMapLoop = new HashMap<String, Extension>();
@@ -127,6 +136,7 @@ public class ScrapingServiceImpl implements ScrapingService {
 			
 				case DIRECTORY:
 			
+					// calls recursion to process the level below the directory
 					try {
 						extensionsMapLoop = scrapDirectoryByUrl(fileSystemNode.getLink());
 					} catch (IOException e) {
@@ -140,6 +150,7 @@ public class ScrapingServiceImpl implements ScrapingService {
 					
 					FileData fileData = new FileData();
 					
+					// calculates the data of a file
 					try {
 						fileData.calculateFileDataWithUrl(new URL(fileSystemNode.getLink()));
 					} catch (IOException e) {
@@ -157,6 +168,7 @@ public class ScrapingServiceImpl implements ScrapingService {
 					break;
 			}
 			
+			// Sums the value of the current iteration with the values of the iterations already performed
 			GitHubUtils.sumExtensionsMaps(extensionsMap, extensionsMapLoop);
 		});	
 		
@@ -172,13 +184,13 @@ public class ScrapingServiceImpl implements ScrapingService {
 		
 		urlResource = new URL(url);
 		
+		// buffers the html page
 		in = new BufferedReader(
 		new InputStreamReader(urlResource.openStream()));
 
+		// get the number of the last commit
 		try {
-		
 			finalCommitCode = ParserUtils.getFinalCommitCode(in);
-		
 		} finally {
 			if(in != null) {
 				in.close();

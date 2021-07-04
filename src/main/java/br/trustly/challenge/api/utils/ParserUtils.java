@@ -14,6 +14,14 @@ public class ParserUtils {
 	
 	private ParserUtils() {}
 	
+	
+	/**
+	 * Searches for the final commit number
+	 * 
+	 * @param in buffer with html page content
+	 * @return the number of the last commit
+	 * @throws IOException
+	 */
 	public static String getFinalCommitCode(BufferedReader in) throws IOException {
 		
 		String inputLine;
@@ -33,6 +41,13 @@ public class ParserUtils {
 		return finalCommitCode;
 	}
 	
+	/**
+	 * Cycles through the buffer and returns the buffer pointed to the 
+	 * section that corresponds to files and directories.
+	 * 
+	 * @param in buffer with html page content
+	 * @throws IOException
+	 */
 	public static void getMainItensSection(BufferedReader in) throws IOException {
 		
 		String inputLine;
@@ -44,6 +59,13 @@ public class ParserUtils {
         }
 	}
 	
+	/**
+	 * Checks if the next filesystem found in the buffer is file or directory
+	 * 
+	 * @param in buffer with html page content
+	 * @return A String with the word directory or file
+	 * @throws IOException
+	 */
 	public static String verifyNextItemIsDirectoryOrFile(BufferedReader in) throws IOException {
 		
 		String inputLine;
@@ -68,6 +90,13 @@ public class ParserUtils {
 		return null;
 	}
 	
+	/**
+	 * Returns the next link of type directory found in buffer
+	 * 
+	 * @param in buffer with html page content
+	 * @return a link of type directory
+	 * @throws IOException
+	 */
 	public static String getDirectoryUrl(BufferedReader in) throws IOException {
 		
 		String inputLine;
@@ -88,6 +117,13 @@ public class ParserUtils {
 		return directoryUrl;
 	}
 	
+	/**
+	 * Returns the next link of type file found in buffer
+	 * 
+	 * @param in buffer with html page content
+	 * @return a link of type file
+	 * @throws IOException
+	 */
 	public static String getFileRawUrl(BufferedReader in) throws IOException {
 		
 		String inputLine;

@@ -21,10 +21,10 @@ public class RepositoryScrapingServiceImpl implements RepositoryScrapingService 
 	@Override
 	public ExtensionsResponseDTO scrapRepo(GitHubRequest request) throws IOException {
 		
-		//validate url
+		// validate url
 		GitHubUtils.validateGitHubUrl(request.getUrl());
 		
-		//get final commit code
+		// get final commit code
 		String commitCode = scrapingService.getFinalCommitCode(request.getUrl());
 	
 		// if cached, get the cached response
@@ -33,7 +33,11 @@ public class RepositoryScrapingServiceImpl implements RepositoryScrapingService 
 		
 		// compare the final commit code with the response
 		if(!commitCode.equals(repository.getCommit())) {
+			
+			// if the commit is out of date, empty the cache
 			scrapingService.emptyCache();
+			
+			// scrap the response
 			repository = scrapingService.scrapRepoByUrlCacheable(request.getUrl());
 		}
 		

@@ -1,5 +1,9 @@
 package br.trustly.challenge.api.models;
 
+/**
+ * Contains filesystem type and link
+ *
+ */
 public class FileSystemNode {
 
 	private FileSystem fs;

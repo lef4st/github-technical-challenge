@@ -11,5 +11,16 @@ import br.trustly.challenge.api.models.GitHubRequest;
  */
 public interface RepositoryScrapingService {
 
+	/**
+	 * Receives the request from the controller and starts the scraping process. 
+	 * Then it returns the response already in DTO format
+	 * 
+	 * @param request request that contains the url of the repository to be scraped
+	 * 
+	 * @return a <b>ExtensionsResponseDTO</b> containing a list with file count, 
+	 *  the total number of lines and the total number of bytes grouped 
+	 *  by file extension
+	 * @throws IOException
+	 */
 	ExtensionsResponseDTO scrapRepo(GitHubRequest request) throws IOException;
 }
