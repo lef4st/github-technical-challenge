@@ -14,6 +14,7 @@ import br.trustly.challenge.api.DTO.ExtensionsResponseDTO;
 import br.trustly.challenge.api.models.Extension;
 import br.trustly.challenge.api.models.GitHubRequest;
 import br.trustly.challenge.api.services.RepositoryScrapingService;
+import br.trustly.challenge.api.services.ScrapingService;
 
 
 /**
@@ -29,6 +30,9 @@ public class ScrapingController {
 
 	@Autowired
 	private RepositoryScrapingService repoScrapingService;
+	
+	@Autowired
+	private ScrapingService scrapingService;
 	
 	/**
 	 * API Index, returns a greeting 
@@ -61,6 +65,20 @@ public class ScrapingController {
 		ExtensionsResponseDTO  responseDTO = repoScrapingService.scrapRepo(request);
 		
 		return ResponseEntity.ok(responseDTO.getData());
+	}
+	
+	/**
+	 * Clears the cache
+	 * 
+	 * @return A <b>ResponseEntity</b> with status 200(OK) containing a 
+	 *  confirmation message
+	 */
+	@GetMapping("/clearCache")
+	public ResponseEntity<String> clearCache() {
+		
+		scrapingService.emptyCache();
+		
+		return ResponseEntity.ok("Cache was cleared");
 	}
 	
 }
