@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import br.trustly.challenge.api.exceptions.DirectoryNotFoundException;
 import br.trustly.challenge.api.models.Extension;
 import br.trustly.challenge.api.models.FileData;
+import br.trustly.challenge.api.models.FileSystem;
+import br.trustly.challenge.api.models.FileSystemNode;
 import br.trustly.challenge.api.models.GitHubRepo;
 import br.trustly.challenge.api.services.ScrapingService;
 import br.trustly.challenge.api.utils.GitHubUtils;
@@ -45,6 +47,7 @@ public class ScrapingServiceImpl implements ScrapingService {
 	@Override
 	public HashMap<String, Extension> scrapDirectoryByUrl(String url) throws IOException {
 		
+		ArrayList<FileSystemNode> fileSystemNodes = null;
 		HashMap<String, Extension> extensionsMap = null;
 		BufferedReader in;
 		URL urlResource;
@@ -60,7 +63,10 @@ public class ScrapingServiceImpl implements ScrapingService {
 	        ParserUtils.getMainItensSection(in);
 			
 	        // Verify files and directories
-	        extensionsMap = processFileListBySection(in);
+	        fileSystemNodes = processFileListBySection(in);
+	        
+	        // Process files and directories
+	        extensionsMap = processFileSystemNodes(fileSystemNodes);
 
 		} finally {
 			if(in != null) {
@@ -72,11 +78,9 @@ public class ScrapingServiceImpl implements ScrapingService {
 	}
 
 	@Override
-	public HashMap<String, Extension> processFileListBySection(BufferedReader in) throws IOException {
-		
-		HashMap<String, Extension> extensionsMap = new HashMap<>();
-		ArrayList<String> directoryUrls = new ArrayList<String>();
-		ArrayList<String> fileRawUrls = new ArrayList<String>();
+	public ArrayList<FileSystemNode> processFileListBySection(BufferedReader in) throws IOException {
+
+		ArrayList<FileSystemNode> fileSystemNodes = new ArrayList<FileSystemNode>();
 		boolean insideDirectoryOrFileSection = true;
 	
 		while(insideDirectoryOrFileSection) {
@@ -93,57 +97,72 @@ public class ScrapingServiceImpl implements ScrapingService {
 				case "Directory":
 					
 					String directoryUrl = ParserUtils.getDirectoryUrl(in);
-					directoryUrls.add(directoryUrl);
+					fileSystemNodes.add(new FileSystemNode(FileSystem.DIRECTORY, directoryUrl));
 					break;
 					
 				case "File":
 
 					String fileRawUrl = ParserUtils.getFileRawUrl(in);
-					fileRawUrls.add(fileRawUrl);
+					fileSystemNodes.add(new FileSystemNode(FileSystem.FILE, fileRawUrl));
 					break;
 			}
 		}
 		
 		in.close();
-		
-		fileRawUrls.parallelStream().forEach(fileRawUrl -> {
-			
-			HashMap<String, Extension> extensionsMapLoop = new HashMap<String, Extension>();
-			FileData fileData = new FileData();
-			
-			try {
-				fileData.calculateFileDataWithUrl(new URL(fileRawUrl));
-			} catch (IOException e) {
-				throw new DirectoryNotFoundException("File raw directory not found: " + fileRawUrl);
-			}
 
-			Extension extensionToAdd = new  Extension();
-			extensionToAdd.setExtension(fileData.getExtension());
-			extensionToAdd.setLines(fileData.getLines());
-			extensionToAdd.setBytes(fileData.getBytes());
-			
-			extensionsMapLoop.put(fileData.getExtension(), extensionToAdd);
-			
-			GitHubUtils.sumExtensionsMaps(extensionsMap, extensionsMapLoop);
-		});
+		return fileSystemNodes;
+	}
+	
+	@Override
+	public HashMap<String, Extension> processFileSystemNodes(ArrayList<FileSystemNode> fileSystemNodes)
+			throws IOException {
 		
-		directoryUrls.parallelStream().forEach(directoryUrl -> {
+		HashMap<String, Extension> extensionsMap = new HashMap<>();
+		
+		fileSystemNodes.parallelStream().forEach(fileSystemNode -> {
 			
 			HashMap<String, Extension> extensionsMapLoop = new HashMap<String, Extension>();
 			
-			try {
-				extensionsMapLoop = scrapDirectoryByUrl(directoryUrl);
-			} catch (IOException e) {
-				throw new DirectoryNotFoundException("Subdirectory not found: " + directoryUrl);
+			switch(fileSystemNode.getFs()) {
+			
+				case DIRECTORY:
+			
+					try {
+						extensionsMapLoop = scrapDirectoryByUrl(fileSystemNode.getLink());
+					} catch (IOException e) {
+						throw new DirectoryNotFoundException("Subdirectory not found: " 
+								+ fileSystemNode.getLink());
+					}
+					
+					break;
+					
+				case FILE:
+					
+					FileData fileData = new FileData();
+					
+					try {
+						fileData.calculateFileDataWithUrl(new URL(fileSystemNode.getLink()));
+					} catch (IOException e) {
+						throw new DirectoryNotFoundException("File raw directory not found: " 
+								+ fileSystemNode.getLink());
+					}
+
+					Extension extensionToAdd = new  Extension();
+					extensionToAdd.setExtension(fileData.getExtension());
+					extensionToAdd.setLines(fileData.getLines());
+					extensionToAdd.setBytes(fileData.getBytes());
+					
+					extensionsMapLoop.put(fileData.getExtension(), extensionToAdd);
+
+					break;
 			}
 			
 			GitHubUtils.sumExtensionsMaps(extensionsMap, extensionsMapLoop);
-		});
-		
+		});	
 		
 		return extensionsMap;
 	}
-
+	
 	@Override
 	public String getFinalCommitCode(String url) throws IOException {
 		
