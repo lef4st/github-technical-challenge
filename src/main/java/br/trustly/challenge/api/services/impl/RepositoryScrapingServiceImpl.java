@@ -10,6 +10,7 @@ import br.trustly.challenge.api.models.GitHubRepo;
 import br.trustly.challenge.api.models.GitHubRequest;
 import br.trustly.challenge.api.services.RepositoryScrapingService;
 import br.trustly.challenge.api.services.ScrapingService;
+import br.trustly.challenge.api.utils.GitHubUtils;
 
 @Service
 public class RepositoryScrapingServiceImpl implements RepositoryScrapingService {
@@ -19,6 +20,9 @@ public class RepositoryScrapingServiceImpl implements RepositoryScrapingService 
 	
 	@Override
 	public ExtensionsResponseDTO scrapRepo(GitHubRequest request) throws IOException {
+		
+		//validate url
+		GitHubUtils.validateGitHubUrl(request.getUrl());
 		
 		//get final commit code
 		String commitCode = scrapingService.getFinalCommitCode(request.getUrl());

@@ -1,6 +1,10 @@
 package br.trustly.challenge.api.utils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
+
+import org.apache.commons.validator.routines.UrlValidator;
 
 import br.trustly.challenge.api.models.Extension;
 
@@ -25,5 +29,31 @@ public class GitHubUtils {
 		
 		
 		return total;
+	}
+	
+	public static void validateGitHubUrl(String url) throws MalformedURLException {
+		
+		validateUrl(url);
+		validateGitHubHostUrl(url);
+	}
+	
+	public static void validateUrl(String url) throws MalformedURLException {
+		
+		String[] schemes = {"http","https"};
+		
+		UrlValidator urlValidator = new UrlValidator(schemes);
+		
+		if(!urlValidator.isValid(url)) {
+			throw new MalformedURLException();
+		}
+	}
+	
+	public static void validateGitHubHostUrl(String url) throws MalformedURLException {
+		
+		URL testingUrl = new URL(url);
+		
+		if(!"github.com".equals(testingUrl.getHost())) {
+			throw new MalformedURLException();
+		}
 	}
 }

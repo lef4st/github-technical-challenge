@@ -1,6 +1,8 @@
 package br.trustly.challenge.api.exceptions;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,10 +21,19 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ExceptionConfig extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler({
-		IllegalArgumentException.class
+		MalformedURLException.class
 	})
 	public ResponseEntity<Object> errorBadRequest(Exception ex) {
-		return ResponseEntity.badRequest().build();
+		return new ResponseEntity<>(new Error("Malformed GitHub URL")
+				, HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler({
+		FileNotFoundException.class
+	})
+	public ResponseEntity<Object> errorFileNotFound(Exception ex) {
+		return new ResponseEntity<>(new Error("Url not found on GitHub")
+				, HttpStatus.NOT_FOUND);
 	}
 	
 	@ExceptionHandler({
