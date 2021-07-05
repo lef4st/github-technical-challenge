@@ -19,6 +19,10 @@ import br.trustly.challenge.api.services.FileSystemService;
 import br.trustly.challenge.api.services.ScrapingService;
 import br.trustly.challenge.api.utils.ParserUtils;
 
+/**
+ * Implementation of the <b>ScrapingService</b> interface
+ *
+ */
 @Service
 public class ScrapingServiceImpl implements ScrapingService {
 

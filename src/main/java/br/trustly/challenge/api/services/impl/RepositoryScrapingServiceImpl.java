@@ -12,6 +12,10 @@ import br.trustly.challenge.api.services.RepositoryScrapingService;
 import br.trustly.challenge.api.services.ScrapingService;
 import br.trustly.challenge.api.utils.GitHubUtils;
 
+/**
+ * Implementation of the <b>RepositoryScrapingService</b> interface
+ *
+ */
 @Service
 public class RepositoryScrapingServiceImpl implements RepositoryScrapingService {
 

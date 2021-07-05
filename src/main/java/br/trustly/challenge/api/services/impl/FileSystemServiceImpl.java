@@ -19,6 +19,10 @@ import br.trustly.challenge.api.services.ScrapingService;
 import br.trustly.challenge.api.utils.GitHubUtils;
 import br.trustly.challenge.api.utils.ParserUtils;
 
+/**
+ * Implementation of the <b>FileSystemService</b> interface
+ *
+ */
 @Service
 public class FileSystemServiceImpl implements FileSystemService {
 
