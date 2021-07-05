@@ -1,0 +1,8 @@
+services:
+  trustly-challenge-github:
+    container_name: trustlyChallengeGitHub
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile    
+    ports:
+      - "8080:8080"
