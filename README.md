@@ -16,7 +16,7 @@
 #### With docker-compose
 
 - On the root project folder, compile the application with the following command: `mvn clean install`
-- Next, execute: `docker-compose -f docker/docker-compose up -d`
+- Next, execute: `docker-compose -f docker/docker-compose.yml up -d`
 
 ### Request example
 
